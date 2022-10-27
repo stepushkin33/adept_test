@@ -1,17 +1,26 @@
 import React from "react";
 import { Employee } from "../../shared/companies/types";
 import axios from "axios";
+import { useAppSelector, useAppDispatch } from "../../redux/hooks";
+import { addEmployee } from "../../redux/slices/employeesSlice";
+import * as S from "../forms.styles";
 
 type Props = {
   url: string;
 };
 
 const EmployeeForm = ({ url }: Props) => {
+  const dispatch = useAppDispatch();
+  const selectedCompanies = useAppSelector(
+    (state) => state.companiesReducer.selectedCompanies
+  );
+  const employees = useAppSelector((state) => state.employeesReducer.employees);
   const [newEmployeeData, setNewEmployeeData] = React.useState<Employee>({
-    id: 0,
+    id: employees.length,
     name: "",
     secondName: "",
     post: "",
+    companyId: selectedCompanies[0],
   });
   const [name, setName] = React.useState<string>("");
   const [secondName, setSecondName] = React.useState<string>("");
@@ -24,7 +33,7 @@ const EmployeeForm = ({ url }: Props) => {
 
   const handleSetSecondName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSecondName(event.target.value);
-    setNewEmployeeData({ ...newEmployeeData, post: event.target.value });
+    setNewEmployeeData({ ...newEmployeeData, secondName: event.target.value });
   };
 
   const handleSetPost = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,33 +50,35 @@ const EmployeeForm = ({ url }: Props) => {
       url: url,
       data: newEmployeeData,
     });
+    dispatch(addEmployee(newEmployeeData));
+    setNewEmployeeData({ ...newEmployeeData, id: newEmployeeData.id + 1 });
   };
 
   return (
-    <form>
-      <label>Добавить новую компанию</label>
-      <input
+    <S.Form>
+      <S.Label>Добавить нового работника</S.Label>
+      <S.Input
         type="text"
         name="name"
         value={name}
         placeholder="Введите имя работника"
         onChange={(event) => handleSetName(event)}
       />
-      <input
+      <S.Input
         type="text"
         name="secondName"
-        value={name}
+        value={secondName}
         placeholder="Введите фамилию работника"
         onChange={(event) => handleSetSecondName(event)}
       />
-      <input
+      <S.Input
         type="text"
         name="post"
         value={post}
         placeholder="Введите должность работника"
         onChange={(event) => handleSetPost(event)}
       />
-      <button
+      <S.Button
         type="submit"
         onClick={(event) => handleSubmit(event)}
         disabled={
@@ -75,8 +86,8 @@ const EmployeeForm = ({ url }: Props) => {
         }
       >
         Добавить
-      </button>
-    </form>
+      </S.Button>
+    </S.Form>
   );
 };
 

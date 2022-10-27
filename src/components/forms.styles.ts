@@ -9,6 +9,8 @@ export const Form = styled.form`
   border: 2px solid #00bfff;
   border-radius: 15px;
   padding: 15px;
+  margin-right: 20px;
+  margin-left: 20px;
 `;
 
 export const Label = styled.label`

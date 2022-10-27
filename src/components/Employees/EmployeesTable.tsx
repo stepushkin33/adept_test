@@ -1,53 +1,66 @@
 import React from "react";
 import { Employee } from "../../shared/companies/types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { setSelectedEmployees } from "../../redux/slices/companiesSlice";
+import { setSelectedEmployees } from "../../redux/slices/employeesSlice";
 import { useIntersectionObserver } from "../../shared/hooks/useIntersectionObserver";
 import * as S from "../tables.styles";
 
 type Props = {
-  employees: Employee[];
+  selectedCompany: number;
 };
 
-const EmployeesTable = ({ employees }: Props) => {
+const EmployeesTable = ({ selectedCompany }: Props) => {
   const [employeesList, setEmployeesList] = React.useState<Employee[]>([]);
-  const [offset, setOffset] = React.useState<number>(1);
-  const total = employees.length;
-  const limit = 10;
-  const hasNextPage = total <= limit + offset;
-  const dispatch = useAppDispatch();
-  const selectedEmployees = useAppSelector(
-    (state) => state.companiesReducer.selectedEmployees
-  );
+  const [offset, setOffset] = React.useState<number>(0);
   const [selectAll, setSelectAll] = React.useState<boolean>(false);
 
-  React.useEffect(() => {
-    setEmployeesList(employees.slice(offset, offset + limit));
-  }, [employees, offset]);
+  const employees = useAppSelector(
+    (state) => state.employeesReducer.employees
+  ).filter((employee) => employee.companyId === selectedCompany);
 
-  React.useEffect(() => {
-    selectAll
-      ? dispatch(setSelectedEmployees(employees.map((item) => item.id)))
-      : dispatch(setSelectedEmployees([]));
-  }, [dispatch, employees, selectAll]);
+  const total = employees.length;
+  const limit = 10;
+  const hasNextPage = total > limit + offset;
+  const dispatch = useAppDispatch();
+
+  const selectedEmployees = useAppSelector(
+    (state) => state.employeesReducer.selectedEmployees
+  );
+
+  const handleSelectAll = () => {
+    if (!selectAll) {
+      setSelectAll(true);
+      dispatch(setSelectedEmployees(employeesList.map((item) => item.id)));
+    } else {
+      dispatch(setSelectedEmployees([]));
+      setSelectAll(false);
+    }
+  };
 
   const changeCheckboxes = (id: number) => {
-    dispatch(
-      setSelectedEmployees(
-        selectedEmployees.includes(id)
-          ? selectedEmployees.filter((item) => item !== id)
-          : [...selectedEmployees, id]
-      )
-    );
+    if (selectedEmployees.includes(id)) {
+      dispatch(
+        setSelectedEmployees(selectedEmployees.filter((item) => id !== item))
+      );
+      setSelectAll(false);
+    } else {
+      dispatch(setSelectedEmployees([...selectedEmployees, id]));
+    }
   };
 
   const cb: IntersectionObserverCallback = React.useCallback(
     ([entry]) => {
-      if (hasNextPage && entry.isIntersecting) {
+      if (employees.length <= limit) {
+        setEmployeesList(employees);
+      } else if (hasNextPage && entry.isIntersecting) {
+        setEmployeesList([
+          ...employeesList,
+          ...employees.slice(offset, offset + limit),
+        ]);
         setOffset(offset + limit);
       }
     },
-    [hasNextPage, offset]
+    [employees, employeesList, hasNextPage, offset]
   );
 
   const callbackRef = useIntersectionObserver(cb);
@@ -60,7 +73,8 @@ const EmployeesTable = ({ employees }: Props) => {
             <S.Td>
               <input
                 type="checkbox"
-                onChange={() => setSelectAll(!selectAll)}
+                onChange={() => handleSelectAll()}
+                checked={selectAll}
               />
             </S.Td>
             <S.Td>Имя</S.Td>
@@ -69,28 +83,30 @@ const EmployeesTable = ({ employees }: Props) => {
           </tr>
         </thead>
         <tbody>
-          {employeesList &&
-            employeesList.map((item) => {
-              return (
-                <S.Tr
-                  $active={selectedEmployees.includes(item.id)}
-                  key={item.id}
-                >
-                  <S.Td>
-                    <input
-                      type="checkbox"
-                      checked={selectedEmployees.includes(item.id)}
-                      onChange={() => changeCheckboxes(item.id)}
-                    />
-                  </S.Td>
-                  <S.Td>{item.name}</S.Td>
-                  <S.Td>{item.secondName}</S.Td>
-                  <S.Td>{item.post}</S.Td>
-                </S.Tr>
-              );
-            })}
+          {employeesList.length
+            ? employeesList.map((item) => {
+                return (
+                  <S.Tr
+                    $active={selectedEmployees.includes(item.id)}
+                    key={item.id}
+                  >
+                    <S.Td>
+                      <input
+                        type="checkbox"
+                        checked={selectedEmployees.includes(item.id)}
+                        onChange={() => changeCheckboxes(item.id)}
+                      />
+                    </S.Td>
+                    <S.Td>{item.name}</S.Td>
+                    <S.Td>{item.secondName}</S.Td>
+                    <S.Td>{item.post}</S.Td>
+                  </S.Tr>
+                );
+              })
+            : undefined}
         </tbody>
       </S.Table>
+      <div ref={callbackRef}></div>
     </>
   );
 };

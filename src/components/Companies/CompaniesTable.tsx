@@ -1,45 +1,70 @@
 import React from "react";
 import { Company } from "../../shared/companies/types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { setSelectedCompanies } from "../../redux/slices/companiesSlice";
+import {
+  setSelectedCompanies,
+  fetchCompanies,
+  setTotal,
+} from "../../redux/slices/companiesSlice";
 import { useIntersectionObserver } from "../../shared/hooks/useIntersectionObserver";
 import * as S from "../tables.styles";
+import axios from "axios";
 
 type Props = {
-  companies: Company[];
-  error: string | undefined;
-  hasNextPage: boolean;
-  currentPage: number;
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  url: string;
 };
 
-const CompaniesTable = ({
-  companies,
-  error,
-  hasNextPage,
-  currentPage,
-  setCurrentPage,
-}: Props) => {
+const CompaniesTable = ({ url }: Props) => {
   const dispatch = useAppDispatch();
-  const selectedCompanies = useAppSelector(
-    (state) => state.companiesReducer.selectedCompanies
+
+  const { selectedCompanies, companies, error, total } = useAppSelector(
+    (state) => state.companiesReducer
   );
+  const employees = useAppSelector((state) => state.employeesReducer.employees);
+
   const [selectAll, setSelectAll] = React.useState<boolean>(false);
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
 
   React.useEffect(() => {
-    selectAll
-      ? dispatch(setSelectedCompanies(companies.map((item) => item.id)))
-      : dispatch(setSelectedCompanies([]));
-  }, [companies, dispatch, selectAll]);
+    const fetchTotal = async () => {
+      const { data } = await axios.get("http://localhost:3000/paging");
+      dispatch(setTotal(data.total));
+    };
+    fetchTotal();
+  }, [dispatch]);
+
+  const limit = 10;
+  const hasNextPage = total >= limit * currentPage;
+
+  React.useEffect(() => {
+    dispatch(
+      fetchCompanies({
+        url: "http://localhost:3000/companies",
+        limit,
+        page: currentPage,
+      })
+    );
+  }, [currentPage, dispatch]);
+
+  const handleSelectAll = () => {
+    if (!selectAll) {
+      setSelectAll(true);
+      dispatch(setSelectedCompanies(companies.map((item) => item.id)));
+    } else {
+      dispatch(setSelectedCompanies([]));
+      setSelectAll(false);
+    }
+  };
 
   const changeCheckboxes = (id: number) => {
-    dispatch(
-      setSelectedCompanies(
-        selectedCompanies.includes(id)
-          ? selectedCompanies.filter((item) => item !== id)
-          : [...selectedCompanies, id]
-      )
-    );
+    if (selectedCompanies.includes(id)) {
+      dispatch(
+        setSelectedCompanies(selectedCompanies.filter((item) => id !== item))
+      );
+      setSelectAll(false);
+    } else {
+      dispatch(setSelectedCompanies([...selectedCompanies, id]));
+    }
   };
 
   const cb: IntersectionObserverCallback = React.useCallback(
@@ -61,7 +86,8 @@ const CompaniesTable = ({
             <S.Td>
               <input
                 type="checkbox"
-                onChange={() => setSelectAll(!selectAll)}
+                onChange={() => handleSelectAll()}
+                checked={selectAll}
               />
             </S.Td>
             <S.Td>Название компании</S.Td>
@@ -82,7 +108,13 @@ const CompaniesTable = ({
                     />
                   </S.Td>
                   <S.Td>{item.name}</S.Td>
-                  <S.Td>{item.employees.length}</S.Td>
+                  <S.Td>
+                    {
+                      employees.filter(
+                        (employee) => employee.companyId === item.id
+                      ).length
+                    }
+                  </S.Td>
                   <S.Td>{item.address}</S.Td>
                 </S.Tr>
               );

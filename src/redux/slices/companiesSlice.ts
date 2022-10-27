@@ -8,7 +8,6 @@ type CompaniesState = {
   loading: boolean;
   error: string | undefined;
   selectedCompanies: number[];
-  selectedEmployees: number[];
 };
 
 export const fetchCompanies = createAsyncThunk<
@@ -25,13 +24,26 @@ export const fetchCompanies = createAsyncThunk<
   }
 });
 
+export const deleteCompany = createAsyncThunk<
+  number,
+  { url: string; id: number },
+  { rejectValue: string }
+>("companies/deleteCompany", async (urlParam, { rejectWithValue }) => {
+  try {
+    const { url, id } = urlParam;
+    const result = await axios.delete(`${url}/${id}`);
+    return id;
+  } catch (error) {
+    return rejectWithValue(String(error));
+  }
+});
+
 const initialState: CompaniesState = {
   companies: [],
   loading: false,
   error: undefined,
   total: 0,
   selectedCompanies: [],
-  selectedEmployees: [],
 };
 
 const companiesSlice = createSlice({
@@ -41,16 +53,12 @@ const companiesSlice = createSlice({
     setSelectedCompanies(state, action) {
       state.selectedCompanies = action.payload;
     },
-    setSelectedEmployees(state, action) {
-      state.selectedEmployees = action.payload;
-    },
     addCompany(state, action) {
       state.companies = [...state.companies, action.payload];
-      state.total++;
+      state.total = state.total + 1;
     },
-    setCompanies(state, action) {
-      state.companies = action.payload;
-      state.total = action.payload.length;
+    setTotal(state, action) {
+      state.total = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -66,14 +74,16 @@ const companiesSlice = createSlice({
       })
       .addCase(fetchCompanies.rejected, (state, action) => {
         state.error = action.payload;
+      })
+      .addCase(deleteCompany.fulfilled, (state, action) => {
+        state.companies = state.companies.filter(
+          (item) => item.id !== action.payload
+        );
+        state.total = state.total - 1;
       });
   },
 });
 
-export const {
-  setSelectedCompanies,
-  setSelectedEmployees,
-  addCompany,
-  setCompanies,
-} = companiesSlice.actions;
+export const { setSelectedCompanies, addCompany, setTotal } =
+  companiesSlice.actions;
 export default companiesSlice.reducer;

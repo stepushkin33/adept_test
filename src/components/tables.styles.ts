@@ -5,7 +5,7 @@ export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   border: 2px solid #00bfff;
-  margin-right: 100px;
+  margin-right: 20px;
 
   td:nth-child(1) {
     width: 10%;

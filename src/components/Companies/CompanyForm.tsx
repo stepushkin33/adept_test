@@ -1,22 +1,22 @@
 import React from "react";
 import { Company } from "../../shared/companies/types";
+import axios from "axios";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import { addCompany } from "../../redux/slices/companiesSlice";
-import axios from "axios";
-import * as S from "../frorms.styles";
+import * as S from "../forms.styles";
 
 type Props = {
   url: string;
 };
 
 const CompanyForm = ({ url }: Props) => {
-  const total = useAppSelector((state) => state.companiesReducer.total);
   const dispatch = useAppDispatch();
+
+  const companies = useAppSelector((state) => state.companiesReducer.companies);
   const [newCompanyData, setNewCompanyData] = React.useState<Company>({
-    id: 0,
+    id: companies.length,
     name: "",
     address: "",
-    employees: [],
   });
   const [name, setName] = React.useState<string>("");
   const [address, setAddress] = React.useState<string>("");
@@ -41,6 +41,7 @@ const CompanyForm = ({ url }: Props) => {
       data: newCompanyData,
     });
     dispatch(addCompany(newCompanyData));
+    setNewCompanyData({ ...newCompanyData, id: newCompanyData.id + 1 });
   };
 
   return (
