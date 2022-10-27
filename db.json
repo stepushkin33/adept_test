@@ -7,32 +7,7 @@
       "id": 11,
       "name": "lorem 12",
       "address": "Ipsum",
-      "employees": [
-        {
-          "id": 0,
-          "name": "Maxim",
-          "secondName": "Stepanov",
-          "post": "developer"
-        },
-        {
-          "id": 1,
-          "name": "Maxim",
-          "secondName": "Stepanov",
-          "post": "developer"
-        },
-        {
-          "id": 2,
-          "name": "Maxim",
-          "secondName": "Stepanov",
-          "post": "developer"
-        },
-        {
-          "id": 3,
-          "name": "Maxim",
-          "secondName": "Stepanov",
-          "post": "developer"
-        }
-      ]
+      "employees": []
     },
     {
       "id": 12,
@@ -1185,6 +1160,37 @@
       "id": 49,
       "name": "lorem 50",
       "address": "Ipsum",
+      "employees": [
+        {
+          "id": 0,
+          "name": "Maxim",
+          "secondName": "Stepanov",
+          "post": "developer"
+        },
+        {
+          "id": 1,
+          "name": "Maxim",
+          "secondName": "Stepanov",
+          "post": "developer"
+        },
+        {
+          "id": 2,
+          "name": "Maxim",
+          "secondName": "Stepanov",
+          "post": "developer"
+        },
+        {
+          "id": 3,
+          "name": "Maxim",
+          "secondName": "Stepanov",
+          "post": "developer"
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "name": "Hawking Bros",
+      "address": "Vladimir, Russia",
       "employees": [
         {
           "id": 0,

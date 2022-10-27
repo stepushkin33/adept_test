@@ -30,8 +30,6 @@ function App() {
   }, []);
   const hasNextPage = total >= limit * currentPage;
 
-  console.log(total);
-
   React.useEffect(() => {
     dispatch(
       fetchCompanies({
@@ -65,9 +63,12 @@ function App() {
 
       <button onClick={() => handleDelete()}>Удалить компании</button>
 
-      {selectedCompanies.length === 1 && (
-        <EmployeesTable employees={companies[selectedCompanies[0]].employees} />
-      )}
+      {selectedCompanies.length === 1 &&
+        companies[selectedCompanies[0]].employees.length && (
+          <EmployeesTable
+            employees={companies[selectedCompanies[0]].employees}
+          />
+        )}
     </S.Wrapper>
   );
 }

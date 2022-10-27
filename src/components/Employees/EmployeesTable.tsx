@@ -70,9 +70,12 @@ const EmployeesTable = ({ employees }: Props) => {
         </thead>
         <tbody>
           {employeesList &&
-            employeesList.map((item, i) => {
+            employeesList.map((item) => {
               return (
-                <tr key={i}>
+                <S.Tr
+                  $active={selectedEmployees.includes(item.id)}
+                  key={item.id}
+                >
                   <S.Td>
                     <input
                       type="checkbox"
@@ -83,7 +86,7 @@ const EmployeesTable = ({ employees }: Props) => {
                   <S.Td>{item.name}</S.Td>
                   <S.Td>{item.secondName}</S.Td>
                   <S.Td>{item.post}</S.Td>
-                </tr>
+                </S.Tr>
               );
             })}
         </tbody>
