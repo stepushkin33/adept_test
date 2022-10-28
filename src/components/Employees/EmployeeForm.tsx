@@ -50,7 +50,6 @@ const EmployeeForm = ({ url }: Props) => {
       ...newEmployeeData,
       id: newEmployeeData.id + 1,
     });
-    console.log(newEmployeeData.id);
     dispatch(addEmployee({ url: url, item: newEmployeeData }));
   };
 
