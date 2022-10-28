@@ -11,7 +11,6 @@ type Props = {
 
 const EmployeesTable = ({ selectedCompany }: Props) => {
   const [employeesList, setEmployeesList] = React.useState<Employee[]>([]);
-  const [offset, setOffset] = React.useState<number>(0);
   const [selectAll, setSelectAll] = React.useState<boolean>(false);
 
   const employees = useAppSelector(
@@ -20,7 +19,8 @@ const EmployeesTable = ({ selectedCompany }: Props) => {
 
   const total = employees.length;
   const limit = 10;
-  const hasNextPage = total > limit + offset;
+  const [offset, setOffset] = React.useState<number>(0);
+  const hasNextPage = total >= limit + offset;
   const dispatch = useAppDispatch();
 
   const selectedEmployees = useAppSelector(
@@ -47,6 +47,10 @@ const EmployeesTable = ({ selectedCompany }: Props) => {
       dispatch(setSelectedEmployees([...selectedEmployees, id]));
     }
   };
+
+  React.useEffect(() => {
+    !selectedEmployees.length && setSelectAll(false);
+  }, [selectedEmployees.length]);
 
   const cb: IntersectionObserverCallback = React.useCallback(
     ([entry]) => {
@@ -84,12 +88,9 @@ const EmployeesTable = ({ selectedCompany }: Props) => {
         </thead>
         <tbody>
           {employeesList.length
-            ? employeesList.map((item) => {
+            ? employeesList.map((item, i) => {
                 return (
-                  <S.Tr
-                    $active={selectedEmployees.includes(item.id)}
-                    key={item.id}
-                  >
+                  <S.Tr $active={selectedEmployees.includes(item.id)} key={i}>
                     <S.Td>
                       <input
                         type="checkbox"

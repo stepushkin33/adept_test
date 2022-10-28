@@ -3,6 +3,7 @@ import { Company } from "../../shared/companies/types";
 import axios from "axios";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import { addCompany } from "../../redux/slices/companiesSlice";
+import { setTotal } from "../../redux/slices/pagingSlice";
 import * as S from "../forms.styles";
 
 type Props = {
@@ -18,6 +19,7 @@ const CompanyForm = ({ url }: Props) => {
     name: "",
     address: "",
   });
+  const total = useAppSelector((state) => state.pagingReducer.total);
   const [name, setName] = React.useState<string>("");
   const [address, setAddress] = React.useState<string>("");
 
@@ -35,13 +37,14 @@ const CompanyForm = ({ url }: Props) => {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
-    axios({
-      method: "post",
-      url: url,
-      data: newCompanyData,
-    });
-    dispatch(addCompany(newCompanyData));
-    setNewCompanyData({ ...newCompanyData, id: newCompanyData.id + 1 });
+    dispatch(addCompany({ url: url, item: newCompanyData }));
+    dispatch(
+      setTotal({
+        url: "http://localhost:3000/paging",
+        value: { total: total + 1 },
+      })
+    );
+    setNewCompanyData({ ...newCompanyData, id: total + 1 });
   };
 
   return (

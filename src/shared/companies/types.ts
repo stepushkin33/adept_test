@@ -12,10 +12,6 @@ export type Company = {
   address: string;
 };
 
-export type dbType = {
-  companies: Company[];
-  employees: Employee[];
-  paging: {
-    total: number;
-  };
+export type Paging = {
+  total: number;
 };

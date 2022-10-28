@@ -4,7 +4,6 @@ import axios from "axios";
 
 type CompaniesState = {
   companies: Company[];
-  total: number;
   loading: boolean;
   error: string | undefined;
   selectedCompanies: number[];
@@ -38,11 +37,24 @@ export const deleteCompany = createAsyncThunk<
   }
 });
 
+export const addCompany = createAsyncThunk<
+  Company,
+  { url: string; item: Company },
+  { rejectValue: string }
+>("Companies/addCompany", async (urlParam, { rejectWithValue }) => {
+  try {
+    const { url, item } = urlParam;
+    const { data } = await axios.post(`${url}`, item);
+    return data;
+  } catch (error) {
+    return rejectWithValue(String(error));
+  }
+});
+
 const initialState: CompaniesState = {
   companies: [],
   loading: false,
   error: undefined,
-  total: 0,
   selectedCompanies: [],
 };
 
@@ -52,13 +64,6 @@ const companiesSlice = createSlice({
   reducers: {
     setSelectedCompanies(state, action) {
       state.selectedCompanies = action.payload;
-    },
-    addCompany(state, action) {
-      state.companies = [...state.companies, action.payload];
-      state.total = state.total + 1;
-    },
-    setTotal(state, action) {
-      state.total = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -79,11 +84,12 @@ const companiesSlice = createSlice({
         state.companies = state.companies.filter(
           (item) => item.id !== action.payload
         );
-        state.total = state.total - 1;
+      })
+      .addCase(addCompany.fulfilled, (state, action) => {
+        state.companies = [...state.companies, action.payload];
       });
   },
 });
 
-export const { setSelectedCompanies, addCompany, setTotal } =
-  companiesSlice.actions;
+export const { setSelectedCompanies } = companiesSlice.actions;
 export default companiesSlice.reducer;

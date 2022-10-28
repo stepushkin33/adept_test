@@ -10,6 +10,7 @@ import {
   deleteCompany,
   setSelectedCompanies,
 } from "./redux/slices/companiesSlice";
+import { setTotal } from "./redux/slices/pagingSlice";
 import EmployeesTable from "./components/Employees/EmployeesTable";
 import * as S from "./app.styles";
 import CompanyForm from "./components/Companies/CompanyForm";
@@ -17,6 +18,8 @@ import EmployeeForm from "./components/Employees/EmployeeForm";
 
 function App() {
   const dispatch = useAppDispatch();
+
+  const total = useAppSelector((state) => state.pagingReducer.total);
 
   const url = "http://localhost:3000";
 
@@ -33,6 +36,12 @@ function App() {
       selectedCompanies.forEach((item) => {
         dispatch(deleteCompany({ url: `${url}/companies`, id: item }));
       });
+    dispatch(
+      setTotal({
+        url: "http://localhost:3000/paging",
+        value: { total: total - selectedCompanies.length },
+      })
+    );
     dispatch(setSelectedCompanies([]));
   };
 

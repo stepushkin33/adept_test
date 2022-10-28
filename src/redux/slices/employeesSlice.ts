@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Employee } from "../../shared/companies/types";
 import axios from "axios";
+import { access } from "fs";
 
 type EmployeesState = {
   employees: Employee[];
@@ -37,6 +38,20 @@ export const deleteEmployee = createAsyncThunk<
   }
 });
 
+export const addEmployee = createAsyncThunk<
+  Employee,
+  { url: string; item: Employee },
+  { rejectValue: string }
+>("employees/addEmployee", async (urlParam, { rejectWithValue }) => {
+  try {
+    const { url, item } = urlParam;
+    const { data } = await axios.post(`${url}`, item);
+    return data;
+  } catch (error) {
+    return rejectWithValue(String(error));
+  }
+});
+
 const initialState: EmployeesState = {
   employees: [],
   loading: false,
@@ -50,9 +65,6 @@ const employeesSlice = createSlice({
   reducers: {
     setSelectedEmployees(state, action) {
       state.selectedEmployees = action.payload;
-    },
-    addEmployee(state, action) {
-      state.employees = [...state.employees, action.payload];
     },
   },
   extraReducers: (builder) => {
@@ -73,9 +85,12 @@ const employeesSlice = createSlice({
         state.employees = state.employees.filter(
           (item) => item.id !== action.payload
         );
+      })
+      .addCase(addEmployee.fulfilled, (state, action) => {
+        state.employees = [...state.employees, action.payload];
       });
   },
 });
 
-export const { setSelectedEmployees, addEmployee } = employeesSlice.actions;
+export const { setSelectedEmployees } = employeesSlice.actions;
 export default employeesSlice.reducer;

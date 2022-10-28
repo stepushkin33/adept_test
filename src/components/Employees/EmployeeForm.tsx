@@ -16,12 +16,13 @@ const EmployeeForm = ({ url }: Props) => {
   );
   const employees = useAppSelector((state) => state.employeesReducer.employees);
   const [newEmployeeData, setNewEmployeeData] = React.useState<Employee>({
-    id: employees.length,
+    id: employees[employees.length - 1].id + 1,
     name: "",
     secondName: "",
     post: "",
     companyId: selectedCompanies[0],
   });
+
   const [name, setName] = React.useState<string>("");
   const [secondName, setSecondName] = React.useState<string>("");
   const [post, setPost] = React.useState<string>("");
@@ -45,13 +46,12 @@ const EmployeeForm = ({ url }: Props) => {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
-    axios({
-      method: "post",
-      url: url,
-      data: newEmployeeData,
+    setNewEmployeeData({
+      ...newEmployeeData,
+      id: newEmployeeData.id + 1,
     });
-    dispatch(addEmployee(newEmployeeData));
-    setNewEmployeeData({ ...newEmployeeData, id: newEmployeeData.id + 1 });
+    console.log(newEmployeeData.id);
+    dispatch(addEmployee({ url: url, item: newEmployeeData }));
   };
 
   return (
